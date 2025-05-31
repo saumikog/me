@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saumik Verma - YouTube Channel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --primary-color: #ff0055;
+      --secondary-color: #00ffff;
+      --bg-color: #121212;
+      --accent-color: #444;
+      --text-light: #f0f0f0;
+      --border-glow: 0 0 12px rgba(255, 0, 85, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-light);
+      line-height: 1.6;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    section, header, footer {
+      border: 2px solid var(--accent-color);
+      border-radius: 15px;
+      margin: 1.5rem;
+      padding: 2rem;
+      box-shadow: 0 0 15px rgba(255, 0, 85, 0.1);
+    }
+
+    header {
+      text-align: center;
+      background: linear-gradient(135deg, #1f1f1f, #2b2b2b);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255,0,85,0.1), transparent 70%);
+      animation: rotate 30s linear infinite;
+      z-index: 0;
+    }
+
+    header img {
+      width: 120px;
+      margin-bottom: 1rem;
+      z-index: 2;
+      position: relative;
+      border-radius: 50%;
+      border: 3px solid var(--primary-color);
+      box-shadow: var(--border-glow);
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+      color: var(--primary-color);
+      text-shadow: var(--border-glow);
+    }
+
+    header p {
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: var(--primary-color);
+      color: #fff;
+      border-radius: 30px;
+      text-decoration: none;
+      margin-top: 2rem;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+      box-shadow: var(--border-glow);
+    }
+
+    .btn:hover {
+      background: var(--secondary-color);
+      color: #000;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    }
+
+    .video-section {
+      text-align: center;
+      background: linear-gradient(135deg, #1a1a1a, #222);
+      transition: transform 0.3s ease;
+    }
+
+    .video-section:hover {
+      transform: scale(1.02);
+    }
+
+    .video-section h2 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      color: var(--secondary-color);
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    .shorts-thumbnail {
+      background: #000;
+      padding: 1rem;
+      border-radius: 15px;
+      display: inline-block;
+      border: 3px solid var(--primary-color);
+      box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .shorts-thumbnail:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+    }
+
+    .shorts-thumbnail img {
+      max-width: 100%;
+      border-radius: 10px;
+    }
+
+    .embed-feed {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 15px;
+      border: 3px solid var(--secondary-color);
+      box-shadow: var(--border-glow);
+    }
+
+    .embed-feed iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .social {
+      text-align: center;
+      background: #181818;
+    }
+
+    .social h2 {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .social a {
+      margin: 0 1rem;
+      text-decoration: none;
+      color: var(--text-light);
+      font-weight: bold;
+      position: relative;
+      padding: 0.3rem 0.5rem;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .social a:hover {
+      color: var(--secondary-color);
+      border-bottom: 2px solid var(--secondary-color);
+    }
+
+    .contact {
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    footer {
+      text-align: center;
+      background: #1a1a1a;
+      color: #777;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.jpg" alt="Saumik Verma Logo">
+    <h1>Saumik Verma</h1>
+    <p>
+      🎬 Welcome to Saumik Verma<br>
+      Where curiosity meets creativity, and boredom comes to die.<br>
+      🔥 Weekly videos of wild adventures, real talk, weird internet finds, and good vibes.
+    </p>
+    <a href="https://youtube.com/@saumikverma?si=9aI_RakifHH_D0GS" target="_blank" class="btn">Subscribe on YouTube</a>
+  </header>
+
+  <section class="video-section">
+    <h2>Latest Video</h2>
+    <a class="shorts-thumbnail" href="https://www.youtube.com/shorts/0VYhtzNd23U" target="_blank">
+      <img src="https://img.youtube.com/vi/0VYhtzNd23U/maxresdefault.jpg" alt="Latest Shorts Video">
+    </a>
+  </section>
+
+  <section class="video-section">
+    <h2>Watch More from the Channel</h2>
+    <div class="embed-feed">
+      <iframe 
+        src="https://www.youtube.com/embed?listType=user_uploads&list=saumikverma" 
+        frameborder="0" 
+        allowfullscreen>
+      </iframe>
+    </div>
+  </section>
+
+  <section class="social">
+    <h2>Connect with Me</h2>
+    <a href="https://www.instagram.com/saumikverma?igsh=YXZjNXlpa2w3YTVn" target="_blank">Instagram</a>
+    <a href="mailto:saumikverma2009@gmail.com">Email</a>
+  </section>
+
+  <footer>
+    &copy; 2025 Saumik Verma | All rights reserved.
+  </footer>
+</body>
+</html>
