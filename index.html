@@ -51,24 +51,6 @@
       overflow: hidden;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    header::before {
-      content: "";
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at center, rgba(255,0,85,0.1), transparent 70%);
-      animation: rotate 30s linear infinite;
-      z-index: 0;
-    }
-
     header img {
       width: 120px;
       margin-bottom: 1rem;
@@ -276,9 +258,124 @@
       color: #777;
     }
 
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    .swipe-btn {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      margin: 10px;
+      transition: background 0.3s;
+    }
+
+    .swipe-btn:hover {
+      background: var(--secondary-color);
+    }
+
+    .arrow-btn {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--primary-color);
+      margin: 0 10px;
+      transition: color 0.3s;
+      user-select: none;
+    }
+
+    .arrow-btn:hover {
+      color: var(--secondary-color);
+    }
+
+    /* Responsive Mobile Styles */
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem;
+      }
+
+      header img {
+        width: 100px;
+        margin-bottom: 0.5rem;
+      }
+
+      header h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      header p {
+        font-size: 1rem;
+        max-width: 100%;
+        margin: 0 auto 1rem auto;
+      }
+
+      section, header, footer {
+        margin: 1rem 0.5rem;
+        padding: 1rem 1rem;
+      }
+
+      .announcement {
+        font-size: 1.8rem;
+        padding: 1rem;
+        margin: 1rem 0.5rem;
+      }
+
+      .live-news {
+        margin: 1rem 0.5rem;
+        padding: 1rem;
+      }
+
+      .live-news h2 {
+        font-size: 1.5rem;
+      }
+
+      .news-container {
+        height: auto;
+        min-height: 200px;
+      }
+
+      .news-item {
+        flex-direction: column;
+        align-items: flex-start;
+        position: relative;
+        opacity: 1 !important; /* Show news items stacked on mobile */
+        border-bottom: 1px solid var(--accent-color);
+        padding: 10px 0;
+        position: static;
+        width: 100%;
+      }
+
+      .news-item img {
+        width: 80px;
+        height: 80px;
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+      }
+
+      .news-item:not(.active) {
+        display: none;
+      }
+
+      .btn {
+        font-size: 1rem;
+        padding: 0.6rem 1.2rem;
+        margin-top: 1rem;
+      }
+
+      .gallery img {
+        max-width: 100%;
+        margin: 1rem 0;
+      }
+
+      form input, form textarea {
+        max-width: 100%;
+      }
+
+      .arrow-btn {
+        font-size: 1.2rem;
+        margin: 0 5px;
+      }
     }
   </style>
 </head>
@@ -300,6 +397,10 @@
 
   <section class="live-news">
     <h2>🏏 Top Cricket Headlines</h2>
+    <div>
+      <span class="arrow-btn" id="prevCricket">&#9664;</span>
+      <span class="arrow-btn" id="nextCricket">&#9654;</span>
+    </div>
     <div class="news-container">
       <div class="news-item active">
         <img src="https://mir-s3-cdn-cf.behance.net/projects/404/865455211486385.Y3JvcCwxMTUwLDkwMCwyNSww.jpg" alt="RCB Title">
@@ -326,6 +427,10 @@
 
   <section class="live-news">
     <h2>💻 Top Technology Headlines</h2>
+    <div>
+      <span class="arrow-btn" id="prevTech">&#9664;</span>
+      <span class="arrow-btn" id="nextTech">&#9654;</span>
+    </div>
     <div class="news-container">
       <div class="news-item active">
         <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Starlink_Mission_%2847926144123%29.jpg" alt="Starlink">
@@ -344,7 +449,7 @@
         <div>4. TCS Extends Partnership with Virgin Atlantic: Tata Consultancy Services has extended its long-term partnership with Virgin Atlantic through a new seven-year agreement aimed at transforming the airline's core technology infrastructure using AI-driven solutions.</div>
       </div>
       <div class="news-item">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/BCCI_Secretary_Shri_Jay_Shah_in_PMO_New_Delhi.jpg/250px-BCCI_Secretary_Shri_Jay_Shah_in_PMO_New_Delhi.jpg" alt="Smartphones">
+        <img src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=1527&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Smartphones">
         <div>5. Top Smartphones Launching in June 2025: This month, OnePlus, Infinix, Vivo, and Poco are set to launch new smartphones across flagship and budget segments in India.</div>
       </div>
     </div>
@@ -352,8 +457,8 @@
 
   <section class="video-section">
     <h2>Latest Video</h2>
-    <a class="shorts-thumbnail" href="https://www.youtube.com/shorts/0VYhtzNd23U" target="_blank">
-      <img src="https://img.youtube.com/vi/0VYhtzNd23U/maxresdefault.jpg" alt="Latest Shorts Video">
+    <a class="shorts-thumbnail" href="https://www.youtube.com/shorts/hjMy-CBJ7Lk" target="_blank">
+      <img src="https://img.youtube.com/vi/hjMy-CBJ7Lk/maxresdefault.jpg" alt="Latest Shorts Video">
     </a>
     <div style="margin-top: 2rem;">
       <a href="https://www.youtube.com/@saumikverma" class="btn" target="_blank">🔴 Open Full Channel</a>
@@ -395,11 +500,42 @@
     </form>
   </section>
 
-  <section class="social">
-    <h2>Connect with Me</h2>
-    <a href="https://instagram.com/saumikverma" target="_blank">
-      <img src="insta.jpg" alt="Instagram" />Instagram
-    </a>
-    <a href="mailto:saumikverma2009@gmail.com">
-      <img src="mail.png" alt="Email" />Gmail
-   
+  <script>
+    // Function to handle changing active news item
+    function setupNewsArrows(prevId, nextId, containerSelector) {
+      const prevBtn = document.getElementById(prevId);
+      const nextBtn = document.getElementById(nextId);
+      const container = document.querySelector(containerSelector);
+      const items = container.querySelectorAll('.news-item');
+      let activeIndex = 0;
+
+      function showItem(index) {
+        items.forEach((item, i) => {
+          if(i === index) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+      }
+
+      prevBtn.addEventListener('click', () => {
+        activeIndex = (activeIndex - 1 + items.length) % items.length;
+        showItem(activeIndex);
+      });
+
+      nextBtn.addEventListener('click', () => {
+        activeIndex = (activeIndex + 1) % items.length;
+        showItem(activeIndex);
+      });
+    }
+
+    // Setup for cricket news arrows
+    setupNewsArrows('prevCricket', 'nextCricket', '.live-news:nth-of-type(2) .news-container');
+
+    // Setup for technology news arrows
+    setupNewsArrows('prevTech', 'nextTech', '.live-news:nth-of-type(3) .news-container');
+  </script>
+</body>
+</html>
+
