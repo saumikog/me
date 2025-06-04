@@ -8,12 +8,13 @@
   <link rel="stylesheet" href="styles.css">
   <style>
     :root {
-      --primary-color: #ff0055;
-      --secondary-color: #00ffff;
+      --primary-color: #ff0055; /* RCB Red */
+      --secondary-color: #f0c040; /* RCB Gold */
       --bg-color: #121212;
       --accent-color: #444;
       --text-light: #f0f0f0;
       --border-glow: 0 0 12px rgba(255, 0, 85, 0.6);
+      --glow-color: rgba(255, 0, 85, 0.8);
     }
 
     * {
@@ -95,284 +96,73 @@
       z-index: 1;
     }
 
-    .ipl-table {
-      position: relative;
-      z-index: 2;
-      background: #1a1a1a;
-      border: 2px solid var(--secondary-color);
-      border-radius: 15px;
-      padding: 1rem;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-      color: var(--text-light);
-      max-width: 400px;
-      overflow-x: auto;
-      margin-top: 1rem;
-    }
-
-    .ipl-table h3 {
+    .announcement {
+      background: var(--primary-color);
       color: var(--secondary-color);
       text-align: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .ipl-table table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-
-    .ipl-table th, .ipl-table td {
-      padding: 0.4rem;
-      border-bottom: 1px solid #333;
-      text-align: center;
-    }
-
-    .ipl-table th {
-      color: var(--primary-color);
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background: var(--primary-color);
-      color: #fff;
-      border-radius: 30px;
-      text-decoration: none;
-      margin-top: 2rem;
-      font-weight: 600;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 0 20px var(--glow-color);
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 1.5rem;
       position: relative;
       z-index: 1;
-      transition: all 0.3s ease;
-      box-shadow: var(--border-glow);
+      animation: glow 1.5s infinite alternate;
     }
 
-    .btn:hover {
-      background: var(--secondary-color);
-      color: #000;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 30px var(--primary-color), 0 0 50px var(--primary-color), 0 0 70px var(--primary-color);
+      }
+      100% {
+        box-shadow: 0 0 15px var(--primary-color), 0 0 30px var(--primary-color), 0 0 50px var(--primary-color);
+      }
     }
 
-    .video-section, .about, .projects, .blog, .gallery, .contact, .social {
-      text-align: center;
+    .live-news {
       background: #1e1e1e;
+      color: var(--text-light);
+      padding: 1.5rem;
+      border-radius: 15px;
+      margin: 1.5rem;
+      box-shadow: 0 0 15px rgba(255, 0, 85, 0.1);
+      overflow: hidden;
+      position: relative;
     }
 
-    h2 {
+    .live-news h2 {
       color: var(--secondary-color);
       margin-bottom: 1rem;
       font-size: 2rem;
     }
 
-    .shorts-thumbnail {
-      background: #000;
-      padding: 1rem;
-      border-radius: 15px;
-      display: inline-block;
-      border: 3px solid var(--primary-color);
-      box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .shorts-thumbnail:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
-    }
-
-    .shorts-thumbnail img {
-      max-width: 100%;
-      border-radius: 10px;
-    }
-
-    .gallery img {
-      width: 100%;
-      max-width: 300px;
-      margin: 1rem;
-      border-radius: 10px;
-      box-shadow: var(--border-glow);
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
-    }
-
-    .gallery img:hover {
-      transform: rotateY(180deg);
-    }
-
-    .social a {
-      display: inline-flex;
-      align-items: center;
-      margin: 0.5rem 1rem;
-      color: var(--text-light);
-      font-weight: 500;
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      background: linear-gradient(145deg, #ff0055, #ff66a3);
-      box-shadow: 0 0 10px rgba(255, 0, 85, 0.6);
-      transition: all 0.3s ease;
-    }
-
-    .social a img {
-      width: 24px;
-      height: 24px;
-      margin-right: 8px;
-      border-radius: 5px;
-    }
-
-    .social a:hover {
-      background: linear-gradient(145deg, #00ffff, #66ffff);
-      color: #000;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-    }
-
-    footer {
-      text-align: center;
-      background: #1a1a1a;
-      color: #777;
-    }
-
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <img src="logo.jpg" alt="Saumik Verma Logo">
-    <h1>Saumik Verma</h1>
-    <p>
-      Hi, I'm <strong>Saumik Verma</strong>, with a passion for content creation.<br>
-      I'm a part-time YouTuber and Instagrammer, always exploring new trends and sharing creativity online.<br>
-      Whether it's videos, reels, or just cool content—I'm all about making it fun and engaging!
-    </p>
-    <a href="https://youtube.com/@saumikverma?si=9aI_RakifHH_D0GS" target="_blank" class="btn">Subscribe on YouTube</a>
-  </header>
-
-  <section class="ipl-table" id="live-ipl-table">
-    <h3>IPL 2025 Live Play Off Points Table</h3>
-    <table id="pointsTable">
-      <thead>
-        <tr><th>Team</th><th>Pts</th><th>NRR</th></tr>
-      </thead>
-      <tbody>
-        <tr><td colspan="3">Loading live data...</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  
-
-  <script>
-    const liveIPLData = [
-      { team: "PBKS", points: 14, nrr: "+0.372" },
-      { team: "RCB", points: 14, nrr: "+0.301"},
-      { team: "GT", points: 14, nrr: "+0.254" },
-      { team: "MI", points: 14, nrr: "+0.142" },
-      
-    ];
-
-    function populateTable(data) {
-      const tbody = document.querySelector("#pointsTable tbody");
-      tbody.innerHTML = "";
-      data.forEach(team => {
-        const row = `<tr>
-          <td>${team.team}</td>
-          <td>${team.points}</td>
-          <td>${team.nrr}</td>
-        </tr>`;
-        tbody.innerHTML += row;
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      populateTable(liveIPLData);
-    });
-  </script>
-  <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Saumik Verma - Personal Website</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    :root {
-      --primary-color: #ff0055;
-      --secondary-color: #00ffff;
-      --bg-color: #121212;
-      --accent-color: #444;
-      --text-light: #f0f0f0;
-      --border-glow: 0 0 12px rgba(255, 0, 85, 0.6);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-light);
-      line-height: 1.6;
-      scroll-behavior: smooth;
-      overflow-x: hidden;
-    }
-
-    section, header, footer {
-      border: 2px solid var(--accent-color);
-      border-radius: 15px;
-      margin: 1.5rem;
-      padding: 2rem;
-      box-shadow: 0 0 15px rgba(255, 0, 85, 0.1);
-    }
-
-    header {
-      text-align: center;
-      background: linear-gradient(135deg, #1f1f1f, #2b2b2b);
+    .news-container {
       position: relative;
+      height: 250px; /* Adjust height as needed */
       overflow: hidden;
     }
 
-    header::before {
-      content: "";
+    .news-item {
       position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at center, rgba(255,0,85,0.1), transparent 70%);
-      animation: rotate 30s linear infinite;
-      z-index: 0;
+      width: 100%;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid var(--accent-color);
     }
 
-    header img {
-      width: 120px;
-      margin-bottom: 1rem;
-      z-index: 2;
-      position: relative;
-      border-radius: 50%;
-      border: 3px solid var(--primary-color);
-      box-shadow: var(--border-glow);
+    .news-item img {
+      width: 100px; /* Increased image width */
+      height: 100px; /* Increased image height */
+      border-radius: 10px;
+      margin-right: 15px; /* Increased margin for better spacing */
     }
 
-    header h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      position: relative;
-      z-index: 1;
-      color: var(--primary-color);
-      text-shadow: var(--border-glow);
-    }
-
-    header p {
-      font-size: 1.1rem;
-      max-width: 700px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
+    .news-item.active {
+      opacity: 1;
     }
 
     .btn {
@@ -492,9 +282,73 @@
     }
   </style>
 </head>
+<body>
+  <header>
+    <img src="logo.jpg" alt="Saumik Verma Logo">
+    <h1>Saumik Verma</h1>
+    <p>
+      Hi, I'm <strong>Saumik Verma</strong>, with a passion for content creation.<br>
+      I'm a part-time YouTuber and Instagrammer, always exploring new trends and sharing creativity online.<br>
+      Whether it's videos, reels, or just cool content—I'm all about making it fun and engaging!
+    </p>
+    <a href="https://youtube.com/@saumikverma?si=9aI_RakifHH_D0GS" target="_blank" class="btn">Subscribe on YouTube</a>
+  </header>
 
+  <section class="announcement">
+    RCB WON IPL 2025!
+  </section>
 
+  <section class="live-news">
+    <h2>🏏 Top Cricket Headlines</h2>
+    <div class="news-container">
+      <div class="news-item active">
+        <img src="https://mir-s3-cdn-cf.behance.net/projects/404/865455211486385.Y3JvcCwxMTUwLDkwMCwyNSww.jpg" alt="RCB Title">
+        <div>1. RCB Clinches Maiden IPL Title: Royal Challengers Bengaluru secured their first-ever IPL championship by defeating Punjab Kings by 6 runs in a thrilling final at Ahmedabad. Virat Kohli led the batting charts with over 600 runs, and Krunal Pandya's disciplined bowling earned him the Player of the Match award.</div>
+      </div>
+      <div class="news-item">
+        <img src="https://images.indianexpress.com/2025/04/VIRAT-KOHLI-IPL-2025.jpg?w=640" alt="Kohli Tribute">
+        <div>2. Virat Kohli's Emotional Tribute: An emotional Virat Kohli dedicated RCB's victory to his wife, Anushka Sharma, acknowledging her unwavering support throughout his career.</div>
+      </div>
+      <div class="news-item">
+        <img src="https://www.livemint.com/lm-img/img/2025/06/02/1600x900/PTI06-01-2025-000661B-0_1748826446099_1748826469549.jpg" alt="Shreyas Iyer">
+        <div>3. Shreyas Iyer Emerges as Future India Captain: Despite the loss, Punjab Kings' captain Shreyas Iyer's calm leadership and strategic acumen have positioned him as a strong candidate for India's future captaincy.</div>
+      </div>
+      <div class="news-item">
+        <img src="https://www.businessbecause.com/uploads/default/news/images/1585136845.png" alt="Rishi Sunak">
+        <div>4. Rishi Sunak Supports RCB: Former UK Prime Minister Rishi Sunak attended the IPL 2025 final, expressing his support for RCB and calling Virat Kohli a "legend." His connection to Bengaluru through his wife, Akshata Murthy, adds a personal touch to his fandom.</div>
+      </div>
+      <div class="news-item">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/BCCI_Secretary_Shri_Jay_Shah_in_PMO_New_Delhi.jpg/250px-BCCI_Secretary_Shri_Jay_Shah_in_PMO_New_Delhi.jpg" alt="Jay Shah">
+        <div>5. Jay Shah Attends IPL Final Amidst Tribute to Armed Forces: BCCI Secretary Jay Shah, along with his family, attended the high-voltage IPL 2025 final, which featured a special ceremony honoring the Indian Armed Forces.</div>
+      </div>
+    </div>
+  </section>
 
+  <section class="live-news">
+    <h2>💻 Top Technology Headlines</h2>
+    <div class="news-container">
+      <div class="news-item active">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Starlink_Mission_%2847926144123%29.jpg" alt="Starlink">
+        <div>1. Starlink Nears Launch in India: Elon Musk's Starlink has cleared a significant regulatory hurdle by obtaining a GMPCS license, bringing it closer to offering satellite-based internet services in India.</div>
+      </div>
+      <div class="news-item">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/74/TechGig.com_Logo.png" alt="TechGig">
+        <div>2. TechGig Launches 'Leaders' Circle': TechGig has introduced an exclusive program called "Leaders' Circle" to bridge the gap between India's developer community and top-tier tech executives, fostering knowledge sharing and mentorship.</div>
+      </div>
+      <div class="news-item">
+        <img src="https://cdn.prod.website-files.com/65a790f0493b6806e60d6e21/666ac55c4eef5e4bda5c2a1b_big-data-image.jpg" alt="Big Data">
+        <div>3. India's Big Data Advantage: Former WEF MD Claude Smadja highlighted India's unparalleled capacity for data collection and utilization, positioning the country to drive the next global tech breakthrough in AI and deep tech fields.</div>
+      </div>
+      <div class="news-item">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSd34vBk8CtuBdSzJHwnvzrDkATNHx6KpF9Qw&s" alt="TCS Virgin">
+        <div>4. TCS Extends Partnership with Virgin Atlantic: Tata Consultancy Services has extended its long-term partnership with Virgin Atlantic through a new seven-year agreement aimed at transforming the airline's core technology infrastructure using AI-driven solutions.</div>
+      </div>
+      <div class="news-item">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/BCCI_Secretary_Shri_Jay_Shah_in_PMO_New_Delhi.jpg/250px-BCCI_Secretary_Shri_Jay_Shah_in_PMO_New_Delhi.jpg" alt="Smartphones">
+        <div>5. Top Smartphones Launching in June 2025: This month, OnePlus, Infinix, Vivo, and Poco are set to launch new smartphones across flagship and budget segments in India.</div>
+      </div>
+    </div>
+  </section>
 
   <section class="video-section">
     <h2>Latest Video</h2>
@@ -541,20 +395,11 @@
     </form>
   </section>
 
-  
- <section class="social">
+  <section class="social">
     <h2>Connect with Me</h2>
     <a href="https://instagram.com/saumikverma" target="_blank">
       <img src="insta.jpg" alt="Instagram" />Instagram
     </a>
     <a href="mailto:saumikverma2009@gmail.com">
       <img src="mail.png" alt="Email" />Gmail
-    </a>
-  <footer>
-    &copy; 2025 Saumik Verma | All rights reserved.
-  </footer>
-</body>
-</html>
-
-</body>
-</html>
+   
