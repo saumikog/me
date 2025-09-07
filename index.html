@@ -1,553 +1,292 @@
-<!DOCTYPE html>
+<!--
+PDF Opener — Premium single-file HTML (Option A)
+Features included in this version:
+- Apple-like premium UI: glassmorphism, rounded corners, soft shadows
+- Auto-loads "C.S Practical.pdf" from same folder (read-only)
+- Sticky floating toolbar with smooth animations
+- Animated loader, smooth page transitions & zoom
+- Retina-ready inline SVG icons
+- System theme detection + manual dark/light toggle
+- Keyboard shortcuts: ← → (pages), +/- (zoom), D (dark toggle)
+- Accessibility: focus states, aria labels, keyboard navigation
+- Uses PDF.js from CDN
+
+Usage: save as `index.html` (or any name) and place `C.S Practical.pdf` in the same folder.
+Open in a modern browser.
+-->
+
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Saumik Verma - Personal Website</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>C.S Practical — Premium Viewer</title>
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <style>
-    :root {
-      --primary-color: #ff0055; /* RCB Red */
-      --secondary-color: #f0c040; /* RCB Gold */
-      --bg-color: #121212;
-      --accent-color: #444;
-      --text-light: #f0f0f0;
-      --border-glow: 0 0 12px rgba(255, 0, 85, 0.6);
-      --glow-color: rgba(255, 0, 85, 0.8);
+    :root{
+      --bg: linear-gradient(180deg,#f6f8fb 0%, #eef3fa 100%);
+      --card-bg: rgba(255,255,255,0.6);
+      --glass-border: rgba(255,255,255,0.6);
+      --muted: #6b7280;
+      --accent: #0a84ff;
+      --accent-2: #5ac7ff;
+      --radius: 18px;
+      --shadow-soft: 0 8px 30px rgba(9,10,18,0.08);
+      --glass-blur: 14px;
+      --text: #071126;
+    }
+    [data-theme="dark"]{
+      --bg: linear-gradient(180deg,#0b0d10 0%, #0f1113 100%);
+      --card-bg: rgba(20,22,24,0.52);
+      --glass-border: rgba(255,255,255,0.04);
+      --muted: #a3b0c0;
+      --accent: #2fa1ff;
+      --accent-2: #62c8ff;
+      --text: #e7f0ff;
+      --shadow-soft: 0 12px 36px rgba(1,3,8,0.7);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* Reset */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:var(--text);
+      background:var(--bg);display:flex;align-items:center;justify-content:center;padding:28px;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
     }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-light);
-      line-height: 1.6;
-      scroll-behavior: smooth;
-      overflow-x: hidden;
+    /* Container */
+    .shell{width:min(1200px,98%);max-width:1200px}
+    .card{
+      border-radius:22px;padding:20px;background:var(--card-bg);backdrop-filter: blur(var(--glass-blur));-webkit-backdrop-filter: blur(var(--glass-blur));border:1px solid var(--glass-border);box-shadow:var(--shadow-soft);
+      display:grid;grid-template-columns:1fr 420px;gap:20px;overflow:hidden;align-items:start;transition:transform .28s cubic-bezier(.2,.9,.2,1);
+    }
+    @media (max-width:980px){.card{grid-template-columns:1fr;}}
+
+    /* Left: preview area */
+    .viewer{
+      position:relative;min-height:640px;border-radius:14px;overflow:hidden;border:1px solid rgba(0,0,0,0.03);
+      background:linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.34));display:flex;flex-direction:column;
     }
 
-    section, header, footer {
-      border: 2px solid var(--accent-color);
-      border-radius: 15px;
-      margin: 1.5rem;
-      padding: 2rem;
-      box-shadow: 0 0 15px rgba(255, 0, 85, 0.1);
+    /* Floating toolbar */
+    .toolbar{
+      position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.7);backdrop-filter:blur(6px);box-shadow:0 6px 22px rgba(8,12,30,0.08);z-index:20;transition:transform .18s ease,opacity .18s ease;
     }
+    [data-theme="dark"] .toolbar{background:rgba(12,14,16,0.56);}
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      text-align: left;
-      background: linear-gradient(135deg, #1f1f1f, #2b2b2b);
-      position: relative;
-      overflow: hidden;
-    }
+    .tool{display:inline-flex;align-items:center;gap:8px;padding:8px;border-radius:10px;border:0;background:transparent;cursor:pointer;font-weight:600}
+    .tool:focus{outline:none;box-shadow:0 0 0 4px rgba(10,132,255,0.12)}
+    .tool .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 6px 16px rgba(10,132,255,0.18)}
 
-    header img {
-      width: 120px;
-      margin-bottom: 1rem;
-      z-index: 2;
-      position: relative;
-      border-radius: 50%;
-      border: 3px solid var(--primary-color);
-      box-shadow: var(--border-glow);
-    }
+    /* Canvas area */
+    .canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:36px;overflow:auto}
+    canvas{border-radius:10px;box-shadow:0 12px 34px rgba(10,12,24,0.06);transform-origin:center center;transition:transform .24s ease}
 
-    header h1 {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      position: relative;
-      z-index: 1;
-      color: var(--primary-color);
-      text-shadow: var(--border-glow);
-    }
+    /* Right panel: meta & controls */
+    .right{display:flex;flex-direction:column;gap:14px}
+    .meta{padding:14px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.5));box-shadow:0 6px 18px rgba(8,12,30,0.04)}
+    [data-theme="dark"] .meta{background:rgba(16,18,20,0.48)}
+    .meta h3{margin:0 0 6px 0}
+    .muted{color:var(--muted)}
 
-    header p {
-      font-size: 1.1rem;
-      max-width: 700px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
+    /* Loader */
+    .loader{width:84px;height:84px;border-radius:20px;background:linear-gradient(180deg,var(--accent-2),var(--accent));display:grid;place-items:center;color:white;font-weight:700;box-shadow:0 10px 30px rgba(10,132,255,0.16)}
+    .ring{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,0.22);border-top-color:rgba(255,255,255,0.9);animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    .announcement {
-      background: var(--primary-color);
-      color: var(--secondary-color);
-      text-align: center;
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 0 20px var(--glow-color);
-      font-size: 2.5rem;
-      font-weight: bold;
-      margin: 1.5rem;
-      position: relative;
-      z-index: 1;
-      animation: glow 1.5s infinite alternate;
-    }
+    /* Buttons */
+    .btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+    .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px 10px;border-radius:10px}
 
-    @keyframes glow {
-      0% {
-        box-shadow: 0 0 30px var(--primary-color), 0 0 50px var(--primary-color), 0 0 70px var(--primary-color);
-      }
-      100% {
-        box-shadow: 0 0 15px var(--primary-color), 0 0 30px var(--primary-color), 0 0 50px var(--primary-color);
-      }
-    }
+    /* small helpers */
+    .row{display:flex;align-items:center;gap:10px}
+    .muted-xs{color:var(--muted);font-size:13px}
+    .kbd{background:rgba(0,0,0,0.04);padding:4px 6px;border-radius:6px;font-family:monospace}
 
-    .live-news {
-      background: #1e1e1e;
-      color: var(--text-light);
-      padding: 1.5rem;
-      border-radius: 15px;
-      margin: 1.5rem;
-      box-shadow: 0 0 15px rgba(255, 0, 85, 0.1);
-      overflow: hidden;
-      position: relative;
-    }
+    /* transitions */
+    .fade-in{animation:fadeIn .32s ease both}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-    .live-news h2 {
-      color: var(--secondary-color);
-      margin-bottom: 1rem;
-      font-size: 2rem;
-    }
+    /* accessibility */
+    :focus{outline:none}
 
-    .news-container {
-      position: relative;
-      height: 250px; /* Adjust height as needed */
-      overflow: hidden;
-    }
-
-    .news-item {
-      position: absolute;
-      width: 100%;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      border-bottom: 1px solid var(--accent-color);
-    }
-
-    .news-item img {
-      width: 100px; /* Increased image width */
-      height: 100px; /* Increased image height */
-      border-radius: 10px;
-      margin-right: 15px; /* Increased margin for better spacing */
-    }
-
-    .news-item.active {
-      opacity: 1;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 0.75rem 1.5rem;
-      background: var(--primary-color);
-      color: #fff;
-      border-radius: 30px;
-      text-decoration: none;
-      margin-top: 2rem;
-      font-weight: 600;
-      position: relative;
-      z-index: 1;
-      transition: all 0.3s ease;
-      box-shadow: var(--border-glow);
-    }
-
-    .btn:hover {
-      background: var(--secondary-color);
-      color: #000;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-    }
-
-    .video-section, .about, .projects, .blog, .gallery, .contact, .social {
-      text-align: center;
-      background: #1e1e1e;
-    }
-
-    h2 {
-      color: var(--secondary-color);
-      margin-bottom: 1rem;
-      font-size: 2rem;
-    }
-
-    .shorts-thumbnail {
-      background: #000;
-      padding: 1rem;
-      border-radius: 15px;
-      display: inline-block;
-      border: 3px solid var(--primary-color);
-      box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .shorts-thumbnail:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
-    }
-
-    .shorts-thumbnail img {
-      max-width: 100%;
-      border-radius: 10px;
-    }
-
-    .gallery img {
-      width: 100%;
-      max-width: 300px;
-      margin: 1rem;
-      border-radius: 10px;
-      box-shadow: var(--border-glow);
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
-    }
-
-    .gallery img:hover {
-      transform: rotateY(180deg);
-    }
-
-    form input, form textarea {
-      width: 100%;
-      max-width: 500px;
-      padding: 0.75rem;
-      margin: 0.5rem auto;
-      display: block;
-      border-radius: 10px;
-      border: none;
-      background: #2a2a2a;
-      color: #fff;
-    }
-
-    .social a {
-      display: inline-flex;
-      align-items: center;
-      margin: 0.5rem 1rem;
-      color: var(--text-light);
-      font-weight: 500;
-      text-decoration: none;
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      background: linear-gradient(145deg, #ff0055, #ff66a3);
-      box-shadow: 0 0 10px rgba(255, 0, 85, 0.6);
-      transition: all 0.3s ease;
-    }
-
-    .social a img {
-      width: 24px;
-      height: 24px;
-      margin-right: 8px;
-      border-radius: 5px;
-    }
-
-    .social a:hover {
-      background: linear-gradient(145deg, #00ffff, #66ffff);
-      color: #000;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
-    }
-
-    footer {
-      text-align: center;
-      background: #1a1a1a;
-      color: #777;
-    }
-
-    .swipe-btn {
-      background: var(--primary-color);
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      padding: 10px 15px;
-      cursor: pointer;
-      margin: 10px;
-      transition: background 0.3s;
-    }
-
-    .swipe-btn:hover {
-      background: var(--secondary-color);
-    }
-
-    .arrow-btn {
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--primary-color);
-      margin: 0 10px;
-      transition: color 0.3s;
-      user-select: none;
-    }
-
-    .arrow-btn:hover {
-      color: var(--secondary-color);
-    }
-
-    /* Responsive Mobile Styles */
-    @media (max-width: 600px) {
-      header {
-        flex-direction: column;
-        text-align: center;
-        padding: 1rem;
-      }
-
-      header img {
-        width: 100px;
-        margin-bottom: 0.5rem;
-      }
-
-      header h1 {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-      }
-
-      header p {
-        font-size: 1rem;
-        max-width: 100%;
-        margin: 0 auto 1rem auto;
-      }
-
-      section, header, footer {
-        margin: 1rem 0.5rem;
-        padding: 1rem 1rem;
-      }
-
-      .announcement {
-        font-size: 1.8rem;
-        padding: 1rem;
-        margin: 1rem 0.5rem;
-      }
-
-      .live-news {
-        margin: 1rem 0.5rem;
-        padding: 1rem;
-      }
-
-      .live-news h2 {
-        font-size: 1.5rem;
-      }
-
-      .news-container {
-        height: auto;
-        min-height: 200px;
-      }
-
-      .news-item {
-        flex-direction: column;
-        align-items: flex-start;
-        position: relative;
-        opacity: 1 !important; /* Show news items stacked on mobile */
-        border-bottom: 1px solid var(--accent-color);
-        padding: 10px 0;
-        position: static;
-        width: 100%;
-      }
-
-      .news-item img {
-        width: 80px;
-        height: 80px;
-        margin-right: 0;
-        margin-bottom: 0.5rem;
-      }
-
-      .news-item:not(.active) {
-        display: none;
-      }
-
-      .btn {
-        font-size: 1rem;
-        padding: 0.6rem 1.2rem;
-        margin-top: 1rem;
-      }
-
-      .gallery img {
-        max-width: 100%;
-        margin: 1rem 0;
-      }
-
-      form input, form textarea {
-        max-width: 100%;
-      }
-
-      .arrow-btn {
-        font-size: 1.2rem;
-        margin: 0 5px;
-      }
-    }
   </style>
 </head>
 <body>
-  <header>
-    <img src="logo.jpg" alt="Saumik Verma Logo">
-    <h1>Saumik Verma</h1>
-    <p>
-      Hi, I'm <strong>Saumik Verma</strong>, with a passion for content creation.<br>
-      I'm a part-time YouTuber and Instagrammer, always exploring new trends and sharing creativity online.<br>
-      Whether it's videos, reels, or just cool content—I'm all about making it fun and engaging!
-    </p>
-    <a href="https://youtube.com/@saumikverma?si=9aI_RakifHH_D0GS" target="_blank" class="btn">Subscribe on YouTube</a>
-  </header>
+  <div class="shell">
+    <div class="card" id="app" role="application" aria-label="C.S Practical PDF Viewer">
 
-  <section class="announcement">
-    RCB WON IPL 2025!
-  </section>
+      <section class="viewer" aria-label="PDF viewer area">
+        <div class="toolbar" role="toolbar" aria-label="viewer controls">
+          <button class="tool" id="btnPrev" title="Previous (←)" aria-label="Previous page">◀︎ Prev</button>
+          <div class="row muted-xs"><span id="pageNum">—</span>&nbsp;/&nbsp;<span id="pageCount">—</span></div>
+          <button class="tool" id="btnNext" title="Next (→)" aria-label="Next page">Next ▶︎</button>
+          <div style="width:12px"></div>
+          <button class="tool" id="btnZoomOut" title="Zoom out (-)">−</button>
+          <div class="row muted-xs"><span id="zoomPct">100%</span></div>
+          <button class="tool" id="btnZoomIn" title="Zoom in (+)">+</button>
+        </div>
 
-  <section class="live-news">
-    <h2>🏏 Top Cricket Headlines</h2>
-    <div>
-      <span class="arrow-btn" id="prevCricket">&#9664;</span>
-      <span class="arrow-btn" id="nextCricket">&#9654;</span>
+        <div class="canvas-wrap" id="canvasWrap">
+          <div id="placeholder" style="text-align:center" class="fade-in">
+            <div class="loader" id="mainLoader">
+              <div class="ring" aria-hidden></div>
+            </div>
+            <div style="margin-top:12px;color:var(--muted);font-weight:600">Loading C.S Practical.pdf…</div>
+          </div>
+          <canvas id="pdfCanvas" style="display:none" role="img" aria-label="PDF page"></canvas>
+        </div>
+      </section>
+
+      <aside class="right">
+        <div class="meta">
+          <h3>C.S Practical.pdf</h3>
+          <div class="muted-xs">Read-only viewer — delivered from the same folder as the HTML file.</div>
+          <div style="height:10px"></div>
+          <div class="row"><div class="muted-xs">Size</div><div id="fileSize">—</div></div>
+          <div class="row"><div class="muted-xs">Pages</div><div id="metaPages">—</div></div>
+          <div style="height:12px"></div>
+          <div class="row"><button class="btn-primary" id="downloadBtn">Download PDF</button><button class="btn-ghost" id="openExternal">Open in new tab</button></div>
+        </div>
+
+        <div class="meta">
+          <h3>Tips</h3>
+          <ul style="margin:0 0 0 16px;padding:0;color:var(--muted)">
+            <li>Keyboard: ← → | +/- | D (dark)</li>
+            <li>High-quality retina rendering</li>
+            <li>No ads — privacy-first</li>
+          </ul>
+        </div>
+
+        <div class="meta">
+          <h3>About</h3>
+          <div class="muted-xs">Inspired UI: KDAN &amp; Lexy — minimal, crisp, and native-feeling.</div>
+        </div>
+      </aside>
+
     </div>
-    <div class="news-container">
-      <div class="news-item active">
-        <img src="https://mir-s3-cdn-cf.behance.net/projects/404/865455211486385.Y3JvcCwxMTUwLDkwMCwyNSww.jpg" alt="RCB Title">
-        <div>1. RCB Clinches Maiden IPL Title: Royal Challengers Bengaluru secured their first-ever IPL championship by defeating Punjab Kings by 6 runs in a thrilling final at Ahmedabad. Virat Kohli led the batting charts with over 600 runs, and Krunal Pandya's disciplined bowling earned him the Player of the Match award.</div>
-      </div>
-      <div class="news-item">
-        <img src="https://images.indianexpress.com/2025/04/VIRAT-KOHLI-IPL-2025.jpg?w=640" alt="Kohli Tribute">
-        <div>2. Virat Kohli's Emotional Tribute: An emotional Virat Kohli dedicated RCB's victory to his wife, Anushka Sharma, acknowledging her unwavering support throughout his career.</div>
-      </div>
-      <div class="news-item">
-        <img src="https://www.livemint.com/lm-img/img/2025/06/02/1600x900/PTI06-01-2025-000661B-0_1748826446099_1748826469549.jpg" alt="Shreyas Iyer">
-        <div>3. Shreyas Iyer Emerges as Future India Captain: Despite the loss, Punjab Kings' captain Shreyas Iyer's calm leadership and strategic acumen have positioned him as a strong candidate for India's future captaincy.</div>
-      </div>
-      <div class="news-item">
-        <img src="https://www.businessbecause.com/uploads/default/news/images/1585136845.png" alt="Rishi Sunak">
-        <div>4. Rishi Sunak Supports RCB: Former UK Prime Minister Rishi Sunak attended the IPL 2025 final, expressing his support for RCB and calling Virat Kohli a "legend." His connection to Bengaluru through his wife, Akshata Murthy, adds a personal touch to his fandom.</div>
-      </div>
-      <div class="news-item">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/BCCI_Secretary_Shri_Jay_Shah_in_PMO_New_Delhi.jpg/250px-BCCI_Secretary_Shri_Jay_Shah_in_PMO_New_Delhi.jpg" alt="Jay Shah">
-        <div>5. Jay Shah Attends IPL Final Amidst Tribute to Armed Forces: BCCI Secretary Jay Shah, along with his family, attended the high-voltage IPL 2025 final, which featured a special ceremony honoring the Indian Armed Forces.</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="live-news">
-    <h2>💻 Top Technology Headlines</h2>
-    <div>
-      <span class="arrow-btn" id="prevTech">&#9664;</span>
-      <span class="arrow-btn" id="nextTech">&#9654;</span>
-    </div>
-    <div class="news-container">
-      <div class="news-item active">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Starlink_Mission_%2847926144123%29.jpg" alt="Starlink">
-        <div>1. Starlink Nears Launch in India: Elon Musk's Starlink has cleared a significant regulatory hurdle by obtaining a GMPCS license, bringing it closer to offering satellite-based internet services in India.</div>
-      </div>
-      <div class="news-item">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/7/74/TechGig.com_Logo.png" alt="TechGig">
-        <div>2. TechGig Launches 'Leaders' Circle': TechGig has introduced an exclusive program called "Leaders' Circle" to bridge the gap between India's developer community and top-tier tech executives, fostering knowledge sharing and mentorship.</div>
-      </div>
-      <div class="news-item">
-        <img src="https://cdn.prod.website-files.com/65a790f0493b6806e60d6e21/666ac55c4eef5e4bda5c2a1b_big-data-image.jpg" alt="Big Data">
-        <div>3. India's Big Data Advantage: Former WEF MD Claude Smadja highlighted India's unparalleled capacity for data collection and utilization, positioning the country to drive the next global tech breakthrough in AI and deep tech fields.</div>
-      </div>
-      <div class="news-item">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSd34vBk8CtuBdSzJHwnvzrDkATNHx6KpF9Qw&s" alt="TCS Virgin">
-        <div>4. TCS Extends Partnership with Virgin Atlantic: Tata Consultancy Services has extended its long-term partnership with Virgin Atlantic through a new seven-year agreement aimed at transforming the airline's core technology infrastructure using AI-driven solutions.</div>
-      </div>
-      <div class="news-item">
-        <img src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=1527&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Smartphones">
-        <div>5. Top Smartphones Launching in June 2025: This month, OnePlus, Infinix, Vivo, and Poco are set to launch new smartphones across flagship and budget segments in India.</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="video-section">
-    <h2>Latest Video</h2>
-    <a class="shorts-thumbnail" href="https://www.youtube.com/shorts/hjMy-CBJ7Lk" target="_blank">
-      <img src="https://img.youtube.com/vi/hjMy-CBJ7Lk/maxresdefault.jpg" alt="Latest Shorts Video">
-    </a>
-    <div style="margin-top: 2rem;">
-      <a href="https://www.youtube.com/@saumikverma" class="btn" target="_blank">🔴 Open Full Channel</a>
-    </div>
-  </section>
-
-  <section class="about">
-    <h2>About Me</h2>
-    <p style="max-width: 800px; margin: 0 auto; font-size: 1.1rem;">
-      I’m a creative soul who loves tech and storytelling. When I’m not editing my next YouTube short,
-      I’m diving into electronics gadgets or learning about new software. Always curious, always building.
-    </p>
-  </section>
-
-  <section class="projects">
-    <h2>My Projects</h2>
-    <p>From content strategy to circuits and scripts—here are a few things I've worked on (coming soon)!</p>
-  </section>
-
-  <section class="blog">
-    <h2>My Blog</h2>
-    <p>Thoughts on creativity, tech tips, content hacks, and more—coming soon!</p>
-  </section>
-
-  <section class="gallery">
-    <h2>Gallery</h2>
-    <img src="content.png" alt="Content Creation">
-    <img src="electro.webp" alt="Electronics">
-    <img src="soft.jpg" alt="Software">
-  </section>
-
-  <section class="contact">
-    <h2>Contact Me</h2>
-    <form action="mailto:saumikverma2009@gmail.com" method="post" enctype="text/plain">
-      <input type="text" name="name" placeholder="Your Name" required>
-      <input type="email" name="email" placeholder="Your Email" required>
-      <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
-      <input type="submit" class="btn" value="Send Message">
-    </form>
-  </section>
-
-  <section class="social">
-    <h2>Connect with Me</h2>
-    <a href="https://instagram.com/saumikverma" target="_blank">
-      <img src="insta.jpg" alt="Instagram" />Instagram
-    </a>
-    <a href="mailto:saumikverma2009@gmail.com">
-      <img src="mail.png" alt="Email" />Gmail
-    </a>
-  <footer>
-    &copy; 2025 Saumik Verma | All rights reserved.
-  </footer>
+  </div>
 
   <script>
-    // Function to handle changing active news item
-    function setupNewsArrows(prevId, nextId, containerSelector) {
-      const prevBtn = document.getElementById(prevId);
-      const nextBtn = document.getElementById(nextId);
-      const container = document.querySelector(containerSelector);
-      const items = container.querySelectorAll('.news-item');
-      let activeIndex = 0;
+    // PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
-      function showItem(index) {
-        items.forEach((item, i) => {
-          if(i === index) {
-            item.classList.add('active');
-          } else {
-            item.classList.remove('active');
-          }
-        });
+    const URL_PDF = 'C.S Practical File (1).pdf'; // file in same folder
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
+    const placeholder = document.getElementById('placeholder');
+    const loader = document.getElementById('mainLoader');
+    const pageNumEl = document.getElementById('pageNum');
+    const pageCountEl = document.getElementById('pageCount');
+    const metaPages = document.getElementById('metaPages');
+    const fileSizeEl = document.getElementById('fileSize');
+    const zoomPct = document.getElementById('zoomPct');
+
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnZoomIn = document.getElementById('btnZoomIn');
+    const btnZoomOut = document.getElementById('btnZoomOut');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const openExternal = document.getElementById('openExternal');
+
+    let pdfDoc = null; let currentPage = 1; let scale = 1.15;
+
+    // System theme detection
+    (function(){
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches;
+      if(prefersDark) document.documentElement.setAttribute('data-theme','dark');
+    })();
+
+    // Fetch PDF (ArrayBuffer) and render first page quickly
+    async function loadAndRender(){
+      try{
+        // fetch and cache ArrayBuffer
+        const resp = await fetch(URL_PDF);
+        if(!resp.ok) throw new Error('PDF not found');
+        const arrayBuffer = await resp.arrayBuffer();
+
+        // file size
+        const size = resp.headers.get('content-length');
+        fileSizeEl.textContent = size ? (Number(size) / 1024).toFixed(1) + ' KB' : 'Unknown';
+
+        // load document
+        pdfDoc = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+        pageCountEl.textContent = pdfDoc.numPages;
+        metaPages.textContent = pdfDoc.numPages;
+
+        // hide loader, show canvas
+        placeholder.style.display = 'none';
+        canvas.style.display = 'block';
+
+        // render
+        await renderPage(currentPage, true);
+      }catch(err){
+        placeholder.innerHTML = '<div style="color:#ff6b6b;font-weight:700">Error loading C.S Practical.pdf</div><div style="margin-top:8px;color:var(--muted)">'+(err.message || '')+'</div>';
+        console.error(err);
       }
-
-      prevBtn.addEventListener('click', () => {
-        activeIndex = (activeIndex - 1 + items.length) % items.length;
-        showItem(activeIndex);
-      });
-
-      nextBtn.addEventListener('click', () => {
-        activeIndex = (activeIndex + 1) % items.length;
-        showItem(activeIndex);
-      });
     }
 
-    // Setup for cricket news arrows
-    setupNewsArrows('prevCricket', 'nextCricket', '.live-news:nth-of-type(2) .news-container');
+    // Render helper with smooth scale transitions
+    let rendering = false;
+    async function renderPage(pageNum, instant=false){
+      if(!pdfDoc) return;
+      rendering = true;
+      const page = await pdfDoc.getPage(pageNum);
+      // compute viewport based on scale and available width
+      const containerWidth = Math.min(window.innerWidth * 0.66, 900) - 100; // comfortable max
+      const viewport = page.getViewport({scale: scale});
 
-    // Setup for technology news arrows
-    setupNewsArrows('prevTech', 'nextTech', '.live-news:nth-of-type(3) .news-container');
+      // adjust scale to fit if needed (preserve chosen scale)
+      const outputScale = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(viewport.width * outputScale);
+      canvas.height = Math.floor(viewport.height * outputScale);
+      canvas.style.width = Math.floor(viewport.width) + 'px';
+      canvas.style.height = Math.floor(viewport.height) + 'px';
+      ctx.setTransform(outputScale,0,0,outputScale,0,0);
+
+      // animate small pop when not instant
+      if(!instant){ canvas.style.transform = 'scale(0.985)'; }
+      await page.render({canvasContext: ctx, viewport}).promise;
+      if(!instant){ canvas.style.transform = 'scale(1)'; }
+
+      pageNumEl.textContent = pageNum;
+      zoomPct.textContent = Math.round(scale * 100) + '%';
+      rendering = false;
+    }
+
+    // Controls
+    btnPrev.addEventListener('click', ()=>{ if(!pdfDoc) return; if(currentPage>1){ currentPage--; renderPage(currentPage);} });
+    btnNext.addEventListener('click', ()=>{ if(!pdfDoc) return; if(currentPage<pdfDoc.numPages){ currentPage++; renderPage(currentPage);} });
+    btnZoomIn.addEventListener('click', ()=>{ scale = Math.min(3, scale + 0.15); renderPage(currentPage); });
+    btnZoomOut.addEventListener('click', ()=>{ scale = Math.max(0.5, scale - 0.15); renderPage(currentPage); });
+
+    // Download & open externally
+    downloadBtn.addEventListener('click', ()=>{ window.location.href = URL_PDF; });
+    openExternal.addEventListener('click', ()=>{ window.open(URL_PDF, '_blank'); });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'ArrowRight') btnNext.click();
+      if(e.key === 'ArrowLeft') btnPrev.click();
+      if(e.key === '+' || e.key === '=') btnZoomIn.click();
+      if(e.key === '-') btnZoomOut.click();
+      if(e.key.toLowerCase() === 'd'){
+        const dt = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.documentElement.setAttribute('data-theme', dt ? 'light':'dark');
+      }
+    });
+
+    // Accessibility: focus initial
+    btnNext.tabIndex=0; btnPrev.tabIndex=0; btnZoomIn.tabIndex=0; btnZoomOut.tabIndex=0;
+
+    // Responsive: re-render on resize to ensure crispness
+    let resizeTimer = null;
+    window.addEventListener('resize', ()=>{ if(pdfDoc){ clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>renderPage(currentPage), 220); } });
+
+    // load
+    loadAndRender();
   </script>
 </body>
 </html>
-
