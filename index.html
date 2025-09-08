@@ -1,292 +1,289 @@
-<!--
-PDF Opener — Premium single-file HTML (Option A)
-Features included in this version:
-- Apple-like premium UI: glassmorphism, rounded corners, soft shadows
-- Auto-loads "C.S Practical.pdf" from same folder (read-only)
-- Sticky floating toolbar with smooth animations
-- Animated loader, smooth page transitions & zoom
-- Retina-ready inline SVG icons
-- System theme detection + manual dark/light toggle
-- Keyboard shortcuts: ← → (pages), +/- (zoom), D (dark toggle)
-- Accessibility: focus states, aria labels, keyboard navigation
-- Uses PDF.js from CDN
-
-Usage: save as `index.html` (or any name) and place `C.S Practical.pdf` in the same folder.
-Open in a modern browser.
--->
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>C.S Practical — Premium Viewer</title>
-  <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apple‑Style PDF Viewer</title>
+  <link rel="icon" href="pdf-icon.png">
   <style>
-    :root{
-      --bg: linear-gradient(180deg,#f6f8fb 0%, #eef3fa 100%);
-      --card-bg: rgba(255,255,255,0.6);
-      --glass-border: rgba(255,255,255,0.6);
-      --muted: #6b7280;
-      --accent: #0a84ff;
-      --accent-2: #5ac7ff;
-      --radius: 18px;
-      --shadow-soft: 0 8px 30px rgba(9,10,18,0.08);
-      --glass-blur: 14px;
-      --text: #071126;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
-    [data-theme="dark"]{
-      --bg: linear-gradient(180deg,#0b0d10 0%, #0f1113 100%);
-      --card-bg: rgba(20,22,24,0.52);
-      --glass-border: rgba(255,255,255,0.04);
-      --muted: #a3b0c0;
-      --accent: #2fa1ff;
-      --accent-2: #62c8ff;
-      --text: #e7f0ff;
-      --shadow-soft: 0 12px 36px rgba(1,3,8,0.7);
+    body {
+      background: #f5f5f7;
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
     }
-
-    /* Reset */
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:var(--text);
-      background:var(--bg);display:flex;align-items:center;justify-content:center;padding:28px;
-      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+    header {
+      width: 100%;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.65);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-
-    /* Container */
-    .shell{width:min(1200px,98%);max-width:1200px}
-    .card{
-      border-radius:22px;padding:20px;background:var(--card-bg);backdrop-filter: blur(var(--glass-blur));-webkit-backdrop-filter: blur(var(--glass-blur));border:1px solid var(--glass-border);box-shadow:var(--shadow-soft);
-      display:grid;grid-template-columns:1fr 420px;gap:20px;overflow:hidden;align-items:start;transition:transform .28s cubic-bezier(.2,.9,.2,1);
+    header h1 {
+      font-size: clamp(14px, 3vw, 18px);
+      font-weight: 600;
+      color: #007aff;
+      white-space: nowrap;
     }
-    @media (max-width:980px){.card{grid-template-columns:1fr;}}
-
-    /* Left: preview area */
-    .viewer{
-      position:relative;min-height:640px;border-radius:14px;overflow:hidden;border:1px solid rgba(0,0,0,0.03);
-      background:linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.34));display:flex;flex-direction:column;
+    .toolbar {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-
-    /* Floating toolbar */
-    .toolbar{
-      position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.7);backdrop-filter:blur(6px);box-shadow:0 6px 22px rgba(8,12,30,0.08);z-index:20;transition:transform .18s ease,opacity .18s ease;
+    .toolbar button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 14px;
+      background: rgba(0, 122, 255, 0.1);
+      color: #007aff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
     }
-    [data-theme="dark"] .toolbar{background:rgba(12,14,16,0.56);}
-
-    .tool{display:inline-flex;align-items:center;gap:8px;padding:8px;border-radius:10px;border:0;background:transparent;cursor:pointer;font-weight:600}
-    .tool:focus{outline:none;box-shadow:0 0 0 4px rgba(10,132,255,0.12)}
-    .tool .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 6px 16px rgba(10,132,255,0.18)}
-
-    /* Canvas area */
-    .canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:36px;overflow:auto}
-    canvas{border-radius:10px;box-shadow:0 12px 34px rgba(10,12,24,0.06);transform-origin:center center;transition:transform .24s ease}
-
-    /* Right panel: meta & controls */
-    .right{display:flex;flex-direction:column;gap:14px}
-    .meta{padding:14px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.5));box-shadow:0 6px 18px rgba(8,12,30,0.04)}
-    [data-theme="dark"] .meta{background:rgba(16,18,20,0.48)}
-    .meta h3{margin:0 0 6px 0}
-    .muted{color:var(--muted)}
-
-    /* Loader */
-    .loader{width:84px;height:84px;border-radius:20px;background:linear-gradient(180deg,var(--accent-2),var(--accent));display:grid;place-items:center;color:white;font-weight:700;box-shadow:0 10px 30px rgba(10,132,255,0.16)}
-    .ring{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,0.22);border-top-color:rgba(255,255,255,0.9);animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* Buttons */
-    .btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:white;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
-    .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px 10px;border-radius:10px}
-
-    /* small helpers */
-    .row{display:flex;align-items:center;gap:10px}
-    .muted-xs{color:var(--muted);font-size:13px}
-    .kbd{background:rgba(0,0,0,0.04);padding:4px 6px;border-radius:6px;font-family:monospace}
-
-    /* transitions */
-    .fade-in{animation:fadeIn .32s ease both}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-    /* accessibility */
-    :focus{outline:none}
-
+    .toolbar button:hover {
+      background: #007aff;
+      color: white;
+    }
+    .toolbar button:active {
+      transform: scale(0.95);
+    }
+    .pdf-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      width: 100%;
+      max-width: 900px;
+      padding: 15px;
+    }
+    canvas {
+      width: 100%;
+      height: auto;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      border-radius: 18px;
+      background: white;
+      margin-bottom: 15px;
+      transition: transform 0.3s ease;
+    }
+    footer {
+      margin-top: auto;
+      padding: 10px;
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+    }
+    .dark-mode {
+      background-color: #1c1c1e;
+      color: #f5f5f7;
+    }
+    .dark-mode header {
+      background: rgba(30, 30, 30, 0.65);
+    }
+    .dark-mode canvas {
+      background: #2c2c2e;
+    }
+    .page-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: nowrap;
+    }
+    .page-controls input {
+      width: 45px;
+      text-align: center;
+      border-radius: 10px;
+      padding: 4px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    @media (max-width: 600px) {
+      .toolbar button {
+        padding: 5px 10px;
+        font-size: 12px;
+        border-radius: 12px;
+      }
+      header h1 {
+        font-size: 14px;
+      }
+      .page-controls input {
+        width: 38px;
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <div class="card" id="app" role="application" aria-label="C.S Practical PDF Viewer">
-
-      <section class="viewer" aria-label="PDF viewer area">
-        <div class="toolbar" role="toolbar" aria-label="viewer controls">
-          <button class="tool" id="btnPrev" title="Previous (←)" aria-label="Previous page">◀︎ Prev</button>
-          <div class="row muted-xs"><span id="pageNum">—</span>&nbsp;/&nbsp;<span id="pageCount">—</span></div>
-          <button class="tool" id="btnNext" title="Next (→)" aria-label="Next page">Next ▶︎</button>
-          <div style="width:12px"></div>
-          <button class="tool" id="btnZoomOut" title="Zoom out (-)">−</button>
-          <div class="row muted-xs"><span id="zoomPct">100%</span></div>
-          <button class="tool" id="btnZoomIn" title="Zoom in (+)">+</button>
-        </div>
-
-        <div class="canvas-wrap" id="canvasWrap">
-          <div id="placeholder" style="text-align:center" class="fade-in">
-            <div class="loader" id="mainLoader">
-              <div class="ring" aria-hidden></div>
-            </div>
-            <div style="margin-top:12px;color:var(--muted);font-weight:600">Loading C.S Practical.pdf…</div>
-          </div>
-          <canvas id="pdfCanvas" style="display:none" role="img" aria-label="PDF page"></canvas>
-        </div>
-      </section>
-
-      <aside class="right">
-        <div class="meta">
-          <h3>C.S Practical.pdf</h3>
-          <div class="muted-xs">Read-only viewer — delivered from the same folder as the HTML file.</div>
-          <div style="height:10px"></div>
-          <div class="row"><div class="muted-xs">Size</div><div id="fileSize">—</div></div>
-          <div class="row"><div class="muted-xs">Pages</div><div id="metaPages">—</div></div>
-          <div style="height:12px"></div>
-          <div class="row"><button class="btn-primary" id="downloadBtn">Download PDF</button><button class="btn-ghost" id="openExternal">Open in new tab</button></div>
-        </div>
-
-        <div class="meta">
-          <h3>Tips</h3>
-          <ul style="margin:0 0 0 16px;padding:0;color:var(--muted)">
-            <li>Keyboard: ← → | +/- | D (dark)</li>
-            <li>High-quality retina rendering</li>
-            <li>No ads — privacy-first</li>
-          </ul>
-        </div>
-
-        <div class="meta">
-          <h3>About</h3>
-          <div class="muted-xs">Inspired UI: KDAN &amp; Lexy — minimal, crisp, and native-feeling.</div>
-        </div>
-      </aside>
-
+  <header>
+    <h1>Saumik Verma PDF Sharing Help Site</h1>
+    <div class="toolbar">
+      <button id="prev">◀ Prev</button>
+      <div class="page-controls">
+        <input id="page-num" type="number" value="1" min="1" /> / <span id="page-count">--</span>
+      </div>
+      <button id="next">Next ▶</button>
+      <button id="zoom-in">＋</button>
+      <button id="zoom-out">－</button>
+      <button id="download">⬇</button>
+      <button id="print">🖨</button>
+      <button id="dark-toggle">🌙</button>
     </div>
+  </header>
+
+  <div class="pdf-container">
+    <canvas id="pdf-render"></canvas>
   </div>
 
+  <footer>
+    Saumik Verma — Built with ❤️
+  </footer>
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
-    // PDF.js worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    const url = "C.S Practical File (1).pdf";
 
-    const URL_PDF = 'C.S Practical File (1).pdf'; // file in same folder
-    const canvas = document.getElementById('pdfCanvas');
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const canvas = document.getElementById('pdf-render');
     const ctx = canvas.getContext('2d');
-    const placeholder = document.getElementById('placeholder');
-    const loader = document.getElementById('mainLoader');
-    const pageNumEl = document.getElementById('pageNum');
-    const pageCountEl = document.getElementById('pageCount');
-    const metaPages = document.getElementById('metaPages');
-    const fileSizeEl = document.getElementById('fileSize');
-    const zoomPct = document.getElementById('zoomPct');
 
-    const btnPrev = document.getElementById('btnPrev');
-    const btnNext = document.getElementById('btnNext');
-    const btnZoomIn = document.getElementById('btnZoomIn');
-    const btnZoomOut = document.getElementById('btnZoomOut');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const openExternal = document.getElementById('openExternal');
+    let pdfDoc = null,
+        pageNum = 1,
+        pageIsRendering = false,
+        pageNumPending = null,
+        scale = 1,
+        minScale = 0.5,
+        maxScale = 3;
 
-    let pdfDoc = null; let currentPage = 1; let scale = 1.15;
+    const renderPage = num => {
+      pageIsRendering = true;
 
-    // System theme detection
-    (function(){
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches;
-      if(prefersDark) document.documentElement.setAttribute('data-theme','dark');
-    })();
+      pdfDoc.getPage(num).then(page => {
+        const viewport = page.getViewport({ scale });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
 
-    // Fetch PDF (ArrayBuffer) and render first page quickly
-    async function loadAndRender(){
-      try{
-        // fetch and cache ArrayBuffer
-        const resp = await fetch(URL_PDF);
-        if(!resp.ok) throw new Error('PDF not found');
-        const arrayBuffer = await resp.arrayBuffer();
+        const renderCtx = {
+          canvasContext: ctx,
+          viewport
+        };
 
-        // file size
-        const size = resp.headers.get('content-length');
-        fileSizeEl.textContent = size ? (Number(size) / 1024).toFixed(1) + ' KB' : 'Unknown';
+        const renderTask = page.render(renderCtx);
 
-        // load document
-        pdfDoc = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-        pageCountEl.textContent = pdfDoc.numPages;
-        metaPages.textContent = pdfDoc.numPages;
+        renderTask.promise.then(() => {
+          pageIsRendering = false;
 
-        // hide loader, show canvas
-        placeholder.style.display = 'none';
-        canvas.style.display = 'block';
+          if (pageNumPending !== null) {
+            renderPage(pageNumPending);
+            pageNumPending = null;
+          }
+        });
 
-        // render
-        await renderPage(currentPage, true);
-      }catch(err){
-        placeholder.innerHTML = '<div style="color:#ff6b6b;font-weight:700">Error loading C.S Practical.pdf</div><div style="margin-top:8px;color:var(--muted)">'+(err.message || '')+'</div>';
-        console.error(err);
+        document.getElementById('page-num').value = num;
+      });
+    };
+
+    const queueRenderPage = num => {
+      if (pageIsRendering) {
+        pageNumPending = num;
+      } else {
+        renderPage(num);
       }
-    }
+    };
 
-    // Render helper with smooth scale transitions
-    let rendering = false;
-    async function renderPage(pageNum, instant=false){
-      if(!pdfDoc) return;
-      rendering = true;
-      const page = await pdfDoc.getPage(pageNum);
-      // compute viewport based on scale and available width
-      const containerWidth = Math.min(window.innerWidth * 0.66, 900) - 100; // comfortable max
-      const viewport = page.getViewport({scale: scale});
+    const showPrevPage = () => {
+      if (pageNum <= 1) return;
+      pageNum--;
+      queueRenderPage(pageNum);
+    };
 
-      // adjust scale to fit if needed (preserve chosen scale)
-      const outputScale = window.devicePixelRatio || 1;
-      canvas.width = Math.floor(viewport.width * outputScale);
-      canvas.height = Math.floor(viewport.height * outputScale);
-      canvas.style.width = Math.floor(viewport.width) + 'px';
-      canvas.style.height = Math.floor(viewport.height) + 'px';
-      ctx.setTransform(outputScale,0,0,outputScale,0,0);
+    const showNextPage = () => {
+      if (pageNum >= pdfDoc.numPages) return;
+      pageNum++;
+      queueRenderPage(pageNum);
+    };
 
-      // animate small pop when not instant
-      if(!instant){ canvas.style.transform = 'scale(0.985)'; }
-      await page.render({canvasContext: ctx, viewport}).promise;
-      if(!instant){ canvas.style.transform = 'scale(1)'; }
+    const zoomIn = () => {
+      if (scale < maxScale) {
+        scale += 0.2;
+        renderPage(pageNum);
+      }
+    };
 
-      pageNumEl.textContent = pageNum;
-      zoomPct.textContent = Math.round(scale * 100) + '%';
-      rendering = false;
-    }
+    const zoomOut = () => {
+      if (scale > minScale) {
+        scale -= 0.2;
+        renderPage(pageNum);
+      }
+    };
 
-    // Controls
-    btnPrev.addEventListener('click', ()=>{ if(!pdfDoc) return; if(currentPage>1){ currentPage--; renderPage(currentPage);} });
-    btnNext.addEventListener('click', ()=>{ if(!pdfDoc) return; if(currentPage<pdfDoc.numPages){ currentPage++; renderPage(currentPage);} });
-    btnZoomIn.addEventListener('click', ()=>{ scale = Math.min(3, scale + 0.15); renderPage(currentPage); });
-    btnZoomOut.addEventListener('click', ()=>{ scale = Math.max(0.5, scale - 0.15); renderPage(currentPage); });
+    const downloadPdf = () => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'C.S Practical File(1).pdf';
+      a.click();
+    };
 
-    // Download & open externally
-    downloadBtn.addEventListener('click', ()=>{ window.location.href = URL_PDF; });
-    openExternal.addEventListener('click', ()=>{ window.open(URL_PDF, '_blank'); });
+    const printPdf = () => {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = url;
+      document.body.appendChild(iframe);
+      iframe.onload = () => {
+        iframe.contentWindow.print();
+      };
+    };
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'ArrowRight') btnNext.click();
-      if(e.key === 'ArrowLeft') btnPrev.click();
-      if(e.key === '+' || e.key === '=') btnZoomIn.click();
-      if(e.key === '-') btnZoomOut.click();
-      if(e.key.toLowerCase() === 'd'){
-        const dt = document.documentElement.getAttribute('data-theme') === 'dark';
-        document.documentElement.setAttribute('data-theme', dt ? 'light':'dark');
+    const toggleDarkMode = () => {
+      document.body.classList.toggle('dark-mode');
+    };
+
+    // Event Listeners
+    document.getElementById('prev').addEventListener('click', showPrevPage);
+    document.getElementById('next').addEventListener('click', showNextPage);
+    document.getElementById('zoom-in').addEventListener('click', zoomIn);
+    document.getElementById('zoom-out').addEventListener('click', zoomOut);
+    document.getElementById('download').addEventListener('click', downloadPdf);
+    document.getElementById('print').addEventListener('click', printPdf);
+    document.getElementById('dark-toggle').addEventListener('click', toggleDarkMode);
+
+    document.getElementById('page-num').addEventListener('change', e => {
+      const num = parseInt(e.target.value);
+      if (num > 0 && num <= pdfDoc.numPages) {
+        pageNum = num;
+        queueRenderPage(pageNum);
       }
     });
 
-    // Accessibility: focus initial
-    btnNext.tabIndex=0; btnPrev.tabIndex=0; btnZoomIn.tabIndex=0; btnZoomOut.tabIndex=0;
-
-    // Responsive: re-render on resize to ensure crispness
-    let resizeTimer = null;
-    window.addEventListener('resize', ()=>{ if(pdfDoc){ clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>renderPage(currentPage), 220); } });
-
-    // load
-    loadAndRender();
+    // Load the PDF
+    pdfjsLib.getDocument(url).promise.then(pdfDoc_ => {
+      pdfDoc = pdfDoc_;
+      document.getElementById('page-count').textContent = pdfDoc.numPages;
+      renderPage(pageNum);
+    });
   </script>
 </body>
 </html>
